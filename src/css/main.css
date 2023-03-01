@@ -1,0 +1,43 @@
+*  {
+    font-family:'Courier New', Courier, monospace ;
+    box-sizing: border-box;
+}
+
+.layout_container {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav_container {
+width: 100%;
+border-bottom: 3px solid black;
+}
+
+.nav_container a {
+margin-right: 1em;
+text-decoration: none;
+color: black;
+}
+
+.main_container, .about_container {
+ min-height: 90vh;
+}
+
+.input_container {
+    display: flex;
+    flex-direction: row;
+}
+
+.input_container button {
+    margin: 0.5em;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.footer_container {
+border-top: 1px solid pink;
+}
