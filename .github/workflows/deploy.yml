@@ -6,7 +6,7 @@ on:
             - master
 
 jobs:
-    publish-docker-hub:
+    deploy:
       name: Publish image in Docker Hub
       runs-on: ubuntu-latest
       steps:
@@ -21,3 +21,11 @@ jobs:
           with:
             push: true
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/radio-cesarito:latest
+
+        - name: Deploy image
+          # Only run this step if the branch is master
+          if: github.ref == 'refs/heads/master'
+          env:
+            deploy_url: ${{ secrets.DEPLOY_HOOK_URL }}
+          run: |
+            curl "$deploy_url"
