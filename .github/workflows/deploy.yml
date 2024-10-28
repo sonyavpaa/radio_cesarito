@@ -9,21 +9,47 @@ jobs:
   build:
     name: Build and analyze
     runs-on: ubuntu-latest
+
+    services:
+    # Start a SonarQube service using Docker
+      sonarqube:
+        image: sonarqube:latest
+        ports:
+          - 9000:9000
     
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@v3
+          
+      - name: Wait SonarQube to be ready
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          until curl -s "$SONAR_HOST_URL/api/system/health" | grep -q '"status":"UP"'; do
+            echo "Waiting for SonarQube to start..."
+            sleep 10
+          done
+          echo "SonarQube is up and running!"
+
+      - name: Run SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=<your_project_key> \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN
+            
+      # Optional: Quality Gate check
+      # Uncomment the following if you want the job to fail based on Quality Gate status
+      # - name: Check SonarQube Quality Gate
+      #   uses: sonarsource/sonarqube-quality-gate-action@master
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
   deploy:
     name: Publish image in Docker Hub
     runs-on: ubuntu-latest
